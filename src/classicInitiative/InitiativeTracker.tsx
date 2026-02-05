@@ -17,7 +17,7 @@ import { getPluginId } from "../helpers/getPluginId";
 import { InitiativeHeader } from "../components/InitiativeHeader";
 import { isPlainObject } from "../helpers/isPlainObject";
 import { sortFromOrder, sortList, useOrder } from "./sceneOrder";
-import { Button, Icon, useTheme } from "@mui/material";
+import { Icon, useTheme } from "@mui/material";
 import {
   ADVANCED_CONTROLS_METADATA_ID,
   DISABLE_NOTIFICATION_METADATA_ID,
@@ -35,6 +35,7 @@ import SettingsButton from "../settings/SettingsButton";
 import { labelItem, selectItem } from "../helpers/findItem";
 import useSelection from "../helpers/useSelection";
 import HeightMonitor from "../components/HeightMonitor";
+import { RoundControl } from "../components/RoundControl";
 
 /** Check that the item metadata is in the correct format */
 function isMetadata(
@@ -345,25 +346,12 @@ export function InitiativeTracker({ role }: { role: "PLAYER" | "GM" }) {
               <SkipPreviousRoundedIcon />
             </IconButton>
             {displayRound && (
-              <>
-                <Button
-                  color="primary"
-                  sx={{ pl: 1, pr: 1, pb: 0.4, borderRadius: 9999 }}
-                  disabled={role === "PLAYER"}
-                  onClick={() => {
-                    if (role === "GM") {
-                      updateRoundCount(1, setRoundCount);
-                      if (!disableNotifications)
-                        OBR.notification.show(
-                          "Round counter reset. Use Undo to restore the counter.",
-                          "INFO",
-                        );
-                    }
-                  }}
-                >
-                  Round {roundCount}
-                </Button>
-              </>
+              <RoundControl
+                playerRole={role}
+                roundCount={roundCount}
+                setRoundCount={setRoundCount}
+                disableNotifications={disableNotifications}
+              />
             )}
             <IconButton
               aria-label="next"

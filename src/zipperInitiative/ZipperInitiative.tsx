@@ -15,6 +15,7 @@ import { getPluginId } from "../helpers/getPluginId";
 import { InitiativeHeader } from "../components/InitiativeHeader";
 import { Divider, Typography } from "@mui/material";
 import {
+  DISABLE_NOTIFICATION_METADATA_ID,
   DISPLAY_ROUND_METADATA_ID,
   PREVIOUS_STACK_METADATA_ID,
   readBooleanFromMetadata,
@@ -22,6 +23,7 @@ import {
   readStringArrayFromMetadata,
   ROUND_COUNT_METADATA_ID,
   SELECT_ACTIVE_ITEM_METADATA_ID,
+  updateRoundCount,
 } from "../helpers/metadataHelpers";
 import SettingsButton from "../settings/SettingsButton";
 import { InitiativeListItem } from "./InitiativeListItem";
@@ -45,6 +47,7 @@ import isMetadata from "./isMetadata";
 import writeGroupDataToItems from "./writeGroupDataToItems";
 import useSelection from "../helpers/useSelection";
 import HeightMonitor from "../components/HeightMonitor";
+import { RoundControl } from "../components/RoundControl";
 
 export function ZipperInitiative({ role }: { role: "PLAYER" | "GM" }) {
   const [initiativeItems, setInitiativeItems] = useState<InitiativeItem[]>([]);
@@ -52,6 +55,7 @@ export function ZipperInitiative({ role }: { role: "PLAYER" | "GM" }) {
 
   const [roundCount, setRoundCount] = useState(1);
   const [displayRound, setDisplayRound] = useState(false);
+  const [disableNotifications, setDisableNotifications] = useState(false);
   const [selectActiveItem, setSelectActiveItem] = useState(0);
 
   const [editMode, setEditMode] = useState(false);
@@ -82,6 +86,13 @@ export function ZipperInitiative({ role }: { role: "PLAYER" | "GM" }) {
           roomMetadata,
           DISPLAY_ROUND_METADATA_ID,
           displayRound,
+        ),
+      );
+      setDisableNotifications(
+        readBooleanFromMetadata(
+          roomMetadata,
+          DISABLE_NOTIFICATION_METADATA_ID,
+          disableNotifications,
         ),
       );
       setSelectActiveItem(
@@ -217,6 +228,8 @@ export function ZipperInitiative({ role }: { role: "PLAYER" | "GM" }) {
   }
 
   function handleResetClicked() {
+    if (roundFinished) updateRoundCount(roundCount + 1, setRoundCount);
+
     // Clear previous stack
     setPreviousStack([]);
     writePreviousStackToScene([]);
@@ -376,7 +389,9 @@ export function ZipperInitiative({ role }: { role: "PLAYER" | "GM" }) {
 
           <Box sx={{ overflowY: "auto", overflowX: "clip" }}>
             <HeightMonitor
-              onChange={(height) => OBR.action.setHeight(height + 64 + 2)}
+              onChange={(height) =>
+                OBR.action.setHeight(height + 64 + 2 + (displayRound ? 54 : 0))
+              }
             >
               <GroupHeading groupName="Party" />
 
@@ -449,6 +464,16 @@ export function ZipperInitiative({ role }: { role: "PLAYER" | "GM" }) {
               />
             </HeightMonitor>
           </Box>
+          {displayRound && (
+            <div className="grid place-items-center py-2">
+              <RoundControl
+                roundCount={roundCount}
+                setRoundCount={setRoundCount}
+                playerRole={role}
+                disableNotifications={disableNotifications}
+              />
+            </div>
+          )}
         </Stack>
       </SortableContext>
     </DndContext>

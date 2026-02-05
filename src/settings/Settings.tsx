@@ -262,7 +262,7 @@ export default function Settings(): JSX.Element {
                       collapseElement={!advancedControls}
                     />
                     <SubSettingsRow
-                      label="Notifications"
+                      label="Disable Notifications"
                       description="Disable warning when the round count is reset"
                       action={
                         <Switch
@@ -278,6 +278,53 @@ export default function Settings(): JSX.Element {
                         />
                       }
                       collapseElement={!advancedControls}
+                      last
+                    />
+                  </SettingsRow>
+                </div>
+              </>
+            )}
+
+            {zipperInitiativeEnabled && (
+              <>
+                <div className="mb-1 mt-4">
+                  <Typography>Counting Initiative</Typography>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <SettingsRow
+                    label="Round Counter"
+                    description="Display the current round"
+                    action={
+                      <Switch
+                        color="secondary"
+                        checked={displayRound}
+                        onChange={(_e, value) => {
+                          setDisplayRound(value);
+                          OBR.room.setMetadata({
+                            [getPluginId(DISPLAY_ROUND_METADATA_ID)]: value,
+                          });
+                        }}
+                      />
+                    }
+                    last={displayRound}
+                  >
+                    <SubSettingsRow
+                      label="Disable Notifications"
+                      description="Disable warning when the round count is reset"
+                      action={
+                        <Switch
+                          color="secondary"
+                          checked={disableNotifications}
+                          onChange={(_e, value) => {
+                            setDisableNotifications(value);
+                            OBR.room.setMetadata({
+                              [getPluginId(DISABLE_NOTIFICATION_METADATA_ID)]:
+                                value,
+                            });
+                          }}
+                        />
+                      }
+                      collapseElement={!displayRound}
                       last
                     />
                   </SettingsRow>
