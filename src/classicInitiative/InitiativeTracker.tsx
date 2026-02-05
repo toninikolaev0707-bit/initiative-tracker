@@ -10,12 +10,12 @@ import SkipNextRounded from "@mui/icons-material/SkipNextRounded";
 
 import OBR, { isImage, Item, Metadata } from "@owlbear-rodeo/sdk";
 
-import { InitiativeItem } from "../InitiativeItem";
+import { InitiativeItem } from "../components/InitiativeItem";
 
 import { InitiativeListItem } from "./InitiativeListItem";
-import { getPluginId } from "../getPluginId";
-import { InitiativeHeader } from "../InitiativeHeader";
-import { isPlainObject } from "../isPlainObject";
+import { getPluginId } from "../helpers/getPluginId";
+import { InitiativeHeader } from "../components/InitiativeHeader";
+import { isPlainObject } from "../helpers/isPlainObject";
 import { sortFromOrder, sortList, useOrder } from "./sceneOrder";
 import { Button, Icon, useTheme } from "@mui/material";
 import {
@@ -28,12 +28,12 @@ import {
   SELECT_ACTIVE_ITEM_METADATA_ID,
   SORT_ASCENDING_METADATA_ID,
   updateRoundCount,
-} from "../metadataHelpers";
+} from "../helpers/metadataHelpers";
 import SortAscendingIcon from "../assets/SortAscendingIcon";
 import SortDescendingIcon from "../assets/SortDescendingIcon";
 import SettingsButton from "../settings/SettingsButton";
-import { labelItem, selectItem } from "../findItem";
-import useSelection from "../useSelection";
+import { labelItem, selectItem } from "../helpers/findItem";
+import useSelection from "../helpers/useSelection";
 
 /** Check that the item metadata is in the correct format */
 function isMetadata(

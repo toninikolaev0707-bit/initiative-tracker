@@ -9,10 +9,10 @@ import LoopRoundedIcon from "@mui/icons-material/LoopRounded";
 
 import OBR, { isImage, Item, Metadata } from "@owlbear-rodeo/sdk";
 
-import { InitiativeItem } from "../InitiativeItem";
+import { InitiativeItem } from "../components/InitiativeItem";
 
-import { getPluginId } from "../getPluginId";
-import { InitiativeHeader } from "../InitiativeHeader";
+import { getPluginId } from "../helpers/getPluginId";
+import { InitiativeHeader } from "../components/InitiativeHeader";
 import { Divider, Typography } from "@mui/material";
 import {
   DISPLAY_ROUND_METADATA_ID,
@@ -22,13 +22,13 @@ import {
   readStringArrayFromMetadata,
   ROUND_COUNT_METADATA_ID,
   SELECT_ACTIVE_ITEM_METADATA_ID,
-} from "../metadataHelpers";
+} from "../helpers/metadataHelpers";
 import SettingsButton from "../settings/SettingsButton";
 import { InitiativeListItem } from "./InitiativeListItem";
 
 import ModeEditRoundedIcon from "@mui/icons-material/ModeEditRounded";
 import EditOffRoundedIcon from "@mui/icons-material/EditOffRounded";
-import { labelItem, removeLabel, selectItem } from "../findItem";
+import { labelItem, removeLabel, selectItem } from "../helpers/findItem";
 import { writePreviousStackToScene } from "./previousStack";
 import {
   closestCenter,
@@ -43,7 +43,7 @@ import { restrictToFirstScrollableAncestor } from "@dnd-kit/modifiers";
 import { CSS } from "@dnd-kit/utilities";
 import isMetadata from "./isMetadata";
 import writeGroupDataToItems from "./writeGroupDataToItems";
-import useSelection from "../useSelection";
+import useSelection from "../helpers/useSelection";
 
 export function ZipperInitiative({ role }: { role: "PLAYER" | "GM" }) {
   const [initiativeItems, setInitiativeItems] = useState<InitiativeItem[]>([]);

@@ -1,7 +1,7 @@
 import { Divider, MenuItem, Select, Switch, Typography } from "@mui/material";
 import OBR, { Metadata, Player } from "@owlbear-rodeo/sdk";
 import { useEffect, useState } from "react";
-import { getPluginId } from "../getPluginId";
+import { getPluginId } from "../helpers/getPluginId";
 import {
   ADVANCED_CONTROLS_METADATA_ID,
   DISABLE_NOTIFICATION_METADATA_ID,
@@ -11,17 +11,17 @@ import {
   ZIPPER_INITIATIVE_ENABLED_METADATA_ID,
   readBooleanFromMetadata,
   readNumberFromMetadata,
-} from "../metadataHelpers";
+} from "../helpers/metadataHelpers";
 
 import "../tailwind.css";
-import { cn } from "../utils";
+import { cn } from "../helpers/utils";
 import LinkButton from "./LinkButton";
 import { Patreon } from "../assets/Patreon";
 import { Bug } from "../assets/bug";
 import { QuestionMark } from "../assets/QuestionMark";
 import { History } from "../assets/History";
-import { removeLabel } from "../findItem";
-import addThemeToBody from "../addThemeToBody";
+import { removeLabel } from "../helpers/findItem";
+import addThemeToBody from "../helpers/addThemeToBody";
 
 export default function Settings(): JSX.Element {
   // General settings
