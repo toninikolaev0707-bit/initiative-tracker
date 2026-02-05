@@ -228,8 +228,12 @@ export function ZipperInitiative({ role }: { role: "PLAYER" | "GM" }) {
     );
   }
 
+  const roundFinished =
+    initiativeItems.filter((item) => item.ready).length === 0;
+  const lastItem = initiativeItems.filter((item) => item.ready).length <= 1;
+
   function handleResetClicked() {
-    if (roundFinished) {
+    if (roundFinished || (lastItem && initiativeItems.length > 1)) {
       if (displayRound) {
         const newRoundCount = roundCount + 1;
         updateRoundCount(newRoundCount, setRoundCount);
@@ -282,8 +286,6 @@ export function ZipperInitiative({ role }: { role: "PLAYER" | "GM" }) {
 
   const allEnemiesHidden =
     enemyItems.filter((item) => item.visible).length === 0;
-  const roundFinished =
-    initiativeItems.filter((item) => item.ready).length === 0;
 
   const sensors = useSensors(
     useSensor(PointerSensor, {

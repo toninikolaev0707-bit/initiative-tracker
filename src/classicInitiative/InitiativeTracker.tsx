@@ -154,6 +154,17 @@ export function InitiativeTracker({ role }: { role: "PLAYER" | "GM" }) {
     // Sort items and write order to the scene
     const sorted = sortList(initiativeItems, sortAscending);
 
+    // Increment round if the last item is selected and the last item is not the first item
+    if (initiativeItems.length > 1) {
+      const index = sorted.findIndex((initiative) => initiative.active);
+      const lastItem = index >= sorted.length - 1;
+      if (lastItem) {
+        const newRoundCount = roundCount + 1;
+        updateRoundCount(newRoundCount, setRoundCount);
+        broadcastRoundChangeEventMessage(newRoundCount);
+      }
+    }
+
     // Focus first item
     const nextIndex = 0;
 
