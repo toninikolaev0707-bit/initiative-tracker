@@ -36,6 +36,7 @@ import { labelItem, selectItem } from "../helpers/findItem";
 import useSelection from "../helpers/useSelection";
 import HeightMonitor from "../components/HeightMonitor";
 import { RoundControl } from "../components/RoundControl";
+import { broadcastRoundChangeEventMessage } from "../helpers/broadcastRoundImplementation";
 
 /** Check that the item metadata is in the correct format */
 function isMetadata(
@@ -192,12 +193,24 @@ export function InitiativeTracker({ role }: { role: "PLAYER" | "GM" }) {
 
     if (newIndex < 0) {
       newIndex = sorted.length + newIndex;
-      if (advancedControls && displayRound && roundCount > 1)
-        updateRoundCount(roundCount - 1, setRoundCount);
+      if (roundCount > 1) {
+        if (advancedControls && displayRound) {
+          const newRoundCount = roundCount - 1;
+          updateRoundCount(newRoundCount, setRoundCount);
+          broadcastRoundChangeEventMessage(newRoundCount);
+        } else {
+          broadcastRoundChangeEventMessage(null);
+        }
+      }
     } else if (newIndex >= sorted.length) {
       newIndex = newIndex % sorted.length;
-      if (advancedControls && displayRound)
-        updateRoundCount(roundCount + 1, setRoundCount);
+      if (advancedControls && displayRound) {
+        const newRoundCount = roundCount + 1;
+        updateRoundCount(newRoundCount, setRoundCount);
+        broadcastRoundChangeEventMessage(newRoundCount);
+      } else {
+        broadcastRoundChangeEventMessage(null);
+      }
     }
 
     // Set local items immediately

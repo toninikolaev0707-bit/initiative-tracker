@@ -48,6 +48,7 @@ import writeGroupDataToItems from "./writeGroupDataToItems";
 import useSelection from "../helpers/useSelection";
 import HeightMonitor from "../components/HeightMonitor";
 import { RoundControl } from "../components/RoundControl";
+import { broadcastRoundChangeEventMessage } from "../helpers/broadcastRoundImplementation";
 
 export function ZipperInitiative({ role }: { role: "PLAYER" | "GM" }) {
   const [initiativeItems, setInitiativeItems] = useState<InitiativeItem[]>([]);
@@ -228,7 +229,15 @@ export function ZipperInitiative({ role }: { role: "PLAYER" | "GM" }) {
   }
 
   function handleResetClicked() {
-    if (roundFinished) updateRoundCount(roundCount + 1, setRoundCount);
+    if (roundFinished) {
+      if (displayRound) {
+        const newRoundCount = roundCount + 1;
+        updateRoundCount(newRoundCount, setRoundCount);
+        broadcastRoundChangeEventMessage(newRoundCount);
+      } else {
+        broadcastRoundChangeEventMessage(null);
+      }
+    }
 
     // Clear previous stack
     setPreviousStack([]);

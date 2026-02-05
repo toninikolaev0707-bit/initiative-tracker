@@ -4,6 +4,7 @@ import React from "react";
 import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
 import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
 import OBR from "@owlbear-rodeo/sdk";
+import { broadcastRoundChangeEventMessage } from "../helpers/broadcastRoundImplementation";
 
 export function RoundControl({
   roundCount,
@@ -56,12 +57,11 @@ export function RoundControl({
         <div className="flex items-stretch gap-2 p-1">
           <IconButton
             aria-label="previous"
-            onClick={() =>
-              updateRoundCount(
-                roundCount > 1 ? roundCount - 1 : 1,
-                setRoundCount,
-              )
-            }
+            onClick={() => {
+              const newRoundNumber = roundCount > 1 ? roundCount - 1 : 1;
+              updateRoundCount(newRoundNumber, setRoundCount);
+              broadcastRoundChangeEventMessage(newRoundNumber);
+            }}
           >
             <ChevronLeftRoundedIcon />
           </IconButton>
@@ -70,7 +70,9 @@ export function RoundControl({
             sx={{ borderRadius: 9999 }}
             disabled={playerRole === "PLAYER"}
             onClick={() => {
-              updateRoundCount(1, setRoundCount);
+              const newRoundNumber = 1;
+              updateRoundCount(newRoundNumber, setRoundCount);
+              broadcastRoundChangeEventMessage(newRoundNumber);
               if (!disableNotifications)
                 OBR.notification.show(
                   "Round counter reset. Use Undo to restore the counter.",
@@ -82,7 +84,11 @@ export function RoundControl({
           </Button>
           <IconButton
             aria-label="previous"
-            onClick={() => updateRoundCount(roundCount + 1, setRoundCount)}
+            onClick={() => {
+              const newRoundNumber = roundCount + 1;
+              updateRoundCount(newRoundNumber, setRoundCount);
+              broadcastRoundChangeEventMessage(newRoundNumber);
+            }}
           >
             <ChevronRightRoundedIcon />
           </IconButton>
