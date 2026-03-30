@@ -48,7 +48,7 @@ export default function TokenImage({
 
   return (
     <img
-      className={cn("tokenIcon max-h-11 max-w-[30px] object-scale-down", {
+      className={cn("tokenIcon max-h-16 max-w-[50px] object-scale-down", {
         "outline-image dark:outline-image": outline,
       })}
       src={image.src}
