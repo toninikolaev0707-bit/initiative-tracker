@@ -1,5 +1,5 @@
 {
-  "name": "Pretty Sordid",
+  "name": "SIGMA СР COUNT PRO",
   "version": "1.6.1",
   "manifest_version": 1,
   "author": "Seamus Finlayson",
@@ -7,7 +7,7 @@
   "icon": "/logo.png",
   "description": "Initiative tracking with token icons and a sort button!",
   "action": {
-    "title": "Pretty Sordid",
+    "title": "SIGMA СР COUNT PRO",
     "icon": "/icon.svg",
     "popover": "/src/action/action.html",
     "height": 129,
