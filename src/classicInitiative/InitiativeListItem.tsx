@@ -99,12 +99,12 @@ export function InitiativeListItem({
     >
       <Box
         component={"div"}
-        className={cn("grid grid-cols-[30px_1fr] items-center gap-2", {
+        className={cn("grid grid-cols-[60px_1fr] items-center gap-2", {
           "grid-cols-[30px_20px_1fr]": !item.visible && showHidden,
         })}
       >
         <IconButton
-          sx={{ paddingX: 0, paddingY: 0, height: 60, width: 60 }}
+          sx={{ paddingX: 0, paddingY: 0, height: 30, width: 30 }}
           onClick={() => removeFromInitiative(item.id)}
           tabIndex={-1}
           onDoubleClick={(e) => e.stopPropagation()}
