@@ -89,6 +89,7 @@ export function App() {
         ],
         id: getPluginId("menu/toggle"),
         onClick(context) {
+          if (role !== "GM") return;
           OBR.scene.items.updateItems(context.items, (items) => {
             // Check whether to add the items to initiative or remove them
             const addToInitiative = items.every(
