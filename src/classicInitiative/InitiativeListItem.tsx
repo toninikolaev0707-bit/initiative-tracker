@@ -115,7 +115,7 @@ export function InitiativeListItem({
             </div>
             <CloseIcon
               className="col-start-1 row-start-1 opacity-0 group-hover:opacity-100"
-              sx={{ height: 30, width: 30 }}
+              sx={{ height: 60, width: 60 }}
             />
           </div>
         </IconButton>
