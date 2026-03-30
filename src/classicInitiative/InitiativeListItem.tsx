@@ -80,7 +80,7 @@ export function InitiativeListItem({
               transition: ".1s",
             },
           }}
-          value={item.count}
+          value={showHidden ? item.count : null}
           onChange={(e) => {
             const newCount = e.target.value;
             onCountChange(newCount);
