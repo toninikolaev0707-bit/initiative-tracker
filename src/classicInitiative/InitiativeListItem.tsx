@@ -104,7 +104,7 @@ export function InitiativeListItem({
         })}
       >
         <IconButton
-          sx={{ paddingX: 0, paddingY: 0, height: 30, width: 30 }}
+          sx={{ paddingX: 0, paddingY: 0, height: 60, width: 60 }}
           onClick={() => removeFromInitiative(item.id)}
           tabIndex={-1}
           onDoubleClick={(e) => e.stopPropagation()}
