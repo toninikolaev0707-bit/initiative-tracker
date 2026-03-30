@@ -130,7 +130,7 @@ export function InitiativeListItem({
             pb: "2px",
           }}
         >
-          {item.name}
+          {item.count}
         </Box>
       </Box>
     </ListItem>
