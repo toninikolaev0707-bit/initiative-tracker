@@ -198,6 +198,7 @@ export function InitiativeTracker({ role }: { role: "PLAYER" | "GM" }) {
   }
 
   function handleDirectionClick(next = true) {
+    if (role !== "GM") return;
     // Get the next index to activate
     const sorted = sortFromOrder(initiativeItems, order);
     let newIndex =
