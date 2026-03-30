@@ -151,6 +151,7 @@ export function InitiativeTracker({ role }: { role: "PLAYER" | "GM" }) {
   }, []);
 
   function handleSortClick() {
+    if (role !== "GM") return;
     // Sort items and write order to the scene
     const sorted = sortList(initiativeItems, sortAscending);
 
@@ -253,6 +254,7 @@ export function InitiativeTracker({ role }: { role: "PLAYER" | "GM" }) {
   }
 
   function handleInitiativeCountChange(id: string, newCount: string) {
+    if (role !== "GM") return;
     // Set local items immediately
     setInitiativeItems((prev) =>
       prev.map((item) => {
