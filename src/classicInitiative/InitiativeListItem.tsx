@@ -93,7 +93,7 @@ export function InitiativeListItem({
       sx={{
         padding: 1,
         pl: "12px",
-        pr: "64px",
+        pr: "128px",
       }}
       onDoubleClick={() => focusItem(item.id)}
     >
