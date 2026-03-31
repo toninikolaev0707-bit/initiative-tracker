@@ -105,7 +105,7 @@ export function InitiativeListItem({
       >
         <IconButton
           sx={{ paddingX: 0, paddingY: 0, height: 30, width: 30 }}
-          onClick={() => removeFromInitiative(item.id, roleIsGm)}
+          onClick={() => removeFromInitiative(item.id)}
           tabIndex={-1}
           onDoubleClick={(e) => e.stopPropagation()}
         >
@@ -141,7 +141,7 @@ export function InitiativeListItem({
 }
 
 function removeFromInitiative(itemId: string, isGM: boolean) {
-  if (!isGM) return;
+  if (!showHidden) return;
 
   OBR.scene.items.getItems([itemId]).then((items) => {
     OBR.scene.items.updateItems(items, (items) => {
