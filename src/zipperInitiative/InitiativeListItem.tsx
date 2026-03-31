@@ -139,7 +139,6 @@ export function InitiativeListItem({
 }
 
 function removeFromInitiative(itemId: string) {
-  if (role !== "GM") return;
   OBR.scene.items.getItems([itemId]).then((items) => {
     OBR.scene.items.updateItems(items, (items) => {
       for (const item of items) {
