@@ -1,6 +1,3 @@
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
-import { Tooltip, Icon, useTheme } from "@mui/material";
-
 import { useEffect, useState } from "react";
 
 import Stack from "@mui/material/Stack";
@@ -20,7 +17,7 @@ import { getPluginId } from "../helpers/getPluginId";
 import { InitiativeHeader } from "../components/InitiativeHeader";
 import { isPlainObject } from "../helpers/isPlainObject";
 import { sortFromOrder, sortList, useOrder } from "./sceneOrder";
-
+import { Icon, useTheme } from "@mui/material";
 import {
   ADVANCED_CONTROLS_METADATA_ID,
   DISABLE_NOTIFICATION_METADATA_ID,
@@ -32,7 +29,6 @@ import {
   SORT_ASCENDING_METADATA_ID,
   updateRoundCount,
 } from "../helpers/metadataHelpers";
-
 import SortAscendingIcon from "../assets/SortAscendingIcon";
 import SortDescendingIcon from "../assets/SortDescendingIcon";
 import SettingsButton from "../settings/SettingsButton";
@@ -42,6 +38,7 @@ import HeightMonitor from "../components/HeightMonitor";
 import { RoundControl } from "../components/RoundControl";
 import { broadcastRoundChangeEventMessage } from "../helpers/broadcastRoundImplementation";
 
+/** Check that the item metadata is in the correct format */
 function isMetadata(
   metadata: unknown,
 ): metadata is { count: string; active: boolean } {
@@ -53,12 +50,16 @@ function isMetadata(
 }
 
 export function InitiativeTracker({ role }: { role: "PLAYER" | "GM" }) {
+  // General settings
   const [selectActiveItem, setSelectActiveItem] = useState(0);
+
+  // Classic initiative settings
   const [sortAscending, setSortAscending] = useState(false);
   const [advancedControls, setAdvancedControls] = useState(false);
   const [displayRound, setDisplayRound] = useState(false);
   const [disableNotifications, setDisableNotifications] = useState(false);
 
+  // Initiative
   const [initiativeItems, setInitiativeItems] = useState<InitiativeItem[]>([]);
   const [roundCount, setRoundCount] = useState(1);
 
@@ -134,6 +135,7 @@ export function InitiativeTracker({ role }: { role: "PLAYER" | "GM" }) {
               name: item.text.plainText || item.name,
               active: metadata.active,
               visible: item.visible,
+              // Unused properties
               ready: true,
               group: 0,
               groupIndex: 0,
@@ -150,95 +152,137 @@ export function InitiativeTracker({ role }: { role: "PLAYER" | "GM" }) {
 
   function handleSortClick() {
     if (role !== "GM") return;
-
+    // Sort items and write order to the scene
     const sorted = sortList(initiativeItems, sortAscending);
 
+    // Increment round if the last item is selected and the last item is not the first item
     if (initiativeItems.length > 1) {
-      const index = sorted.findIndex((i) => i.active);
-      if (index >= sorted.length - 1) {
+      const index = sorted.findIndex((initiative) => initiative.active);
+      const lastItem = index >= sorted.length - 1;
+      if (lastItem) {
         const newRoundCount = roundCount + 1;
         updateRoundCount(newRoundCount, setRoundCount);
         broadcastRoundChangeEventMessage(newRoundCount);
       }
     }
 
+    // Focus first item
     const nextIndex = 0;
 
+    // Set local items immediately
     setInitiativeItems(
       sorted.map((item, index) => {
         const active = index === 0;
         if (selectActiveItem === 1 && active) selectItem(item.id);
         if (selectActiveItem === 2 && active) labelItem(item.id);
-        return { ...item, active };
+        return {
+          ...item,
+          active,
+        };
       }),
     );
 
+    // Update the scene items with the new active status
     OBR.scene.items.updateItems(
-      sorted.map((i) => i.id),
+      sorted.map((init) => init.id),
       (items) => {
-        items.forEach((item, i) => {
+        for (let i = 0; i < items.length; i++) {
+          const item = items[i];
           const metadata = item.metadata[getPluginId("metadata")];
           if (isMetadata(metadata)) {
             metadata.active = i === nextIndex;
           }
-        });
+        }
       },
     );
   }
 
   function handleDirectionClick(next = true) {
     if (role !== "GM") return;
-
+    // Get the next index to activate
     const sorted = sortFromOrder(initiativeItems, order);
     let newIndex =
-      sorted.findIndex((i) => i.active) + (next ? 1 : -1);
+      sorted.findIndex((initiative) => initiative.active) + (next ? 1 : -1);
 
-    if (newIndex < 0) newIndex = sorted.length - 1;
-    if (newIndex >= sorted.length) newIndex = 0;
+    if (newIndex < 0) {
+      newIndex = sorted.length + newIndex;
+      if (roundCount > 1) {
+        if (advancedControls && displayRound) {
+          const newRoundCount = roundCount - 1;
+          updateRoundCount(newRoundCount, setRoundCount);
+          broadcastRoundChangeEventMessage(newRoundCount);
+        } else {
+          broadcastRoundChangeEventMessage(null);
+        }
+      }
+    } else if (newIndex >= sorted.length) {
+      newIndex = newIndex % sorted.length;
+      if (advancedControls && displayRound) {
+        const newRoundCount = roundCount + 1;
+        updateRoundCount(newRoundCount, setRoundCount);
+        broadcastRoundChangeEventMessage(newRoundCount);
+      } else {
+        broadcastRoundChangeEventMessage(null);
+      }
+    }
 
+    // Set local items immediately
     setInitiativeItems(
       sorted.map((item, index) => {
         const active = index === newIndex;
         if (selectActiveItem === 1 && active) selectItem(item.id);
         if (selectActiveItem === 2 && active) labelItem(item.id);
-        return { ...item, active };
+        return {
+          ...item,
+          active,
+        };
       }),
     );
 
+    // Update the scene items with the new active status
     OBR.scene.items.updateItems(
-      sorted.map((i) => i.id),
+      sorted.map((init) => init.id),
       (items) => {
-        items.forEach((item, i) => {
+        for (let i = 0; i < items.length; i++) {
+          const item = items[i];
           const metadata = item.metadata[getPluginId("metadata")];
           if (isMetadata(metadata)) {
             metadata.active = i === newIndex;
           }
-        });
+        }
       },
     );
   }
 
   function handleInitiativeCountChange(id: string, newCount: string) {
     if (role !== "GM") return;
-
+    // Set local items immediately
     setInitiativeItems((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, count: newCount } : item,
-      ),
+      prev.map((item) => {
+        if (item.id === id) {
+          return {
+            ...item,
+            count: newCount,
+          };
+        } else {
+          return item;
+        }
+      }),
     );
-
+    // Sync changes over the network
     OBR.scene.items.updateItems([id], (items) => {
-      items.forEach((item) => {
+      for (const item of items) {
         const metadata = item.metadata[getPluginId("metadata")];
         if (isMetadata(metadata)) {
           metadata.count = newCount;
         }
-      });
+      }
     });
   }
 
   const order = useOrder();
   const sortedInitiativeItems = sortFromOrder(initiativeItems, order);
+
   const themeIsDark = useTheme().palette.mode === "dark";
 
   return (
@@ -251,36 +295,21 @@ export function InitiativeTracker({ role }: { role: "PLAYER" | "GM" }) {
         }
         action={
           <>
-            <Tooltip
-              arrow
-              placement="bottom"
-              title={
-                <>
-                  <div>ЛКМ — выбрать токен</div>
-                  <div>ПКМ — добавить в инициативу</div>
-                  <div>Стрелки — смена хода</div>
-                </>
-              }
-            >
-              <IconButton>
-                <HelpOutlineIcon />
-              </IconButton>
-            </Tooltip>
-
-            {role === "GM" && <SettingsButton />}
-
+            {role === "GM" && <SettingsButton></SettingsButton>}
             <IconButton onClick={handleSortClick}>
               <Icon>
                 {sortAscending ? (
-                  <SortAscendingIcon darkMode={themeIsDark} />
+                  <SortAscendingIcon darkMode={themeIsDark}></SortAscendingIcon>
                 ) : (
-                  <SortDescendingIcon darkMode={themeIsDark} />
+                  <SortDescendingIcon
+                    darkMode={themeIsDark}
+                  ></SortDescendingIcon>
                 )}
               </Icon>
             </IconButton>
-
             {!advancedControls && (
               <IconButton
+                aria-label="next"
                 onClick={() => handleDirectionClick()}
                 disabled={initiativeItems.length === 0}
               >
@@ -294,7 +323,9 @@ export function InitiativeTracker({ role }: { role: "PLAYER" | "GM" }) {
       <Box sx={{ overflowY: "auto" }}>
         <HeightMonitor
           onChange={(height) =>
-            OBR.action.setHeight(66 + Math.max(64, height))
+            OBR.action.setHeight(
+              66 + Math.max(64, height) + (advancedControls ? 56 : 0),
+            )
           }
         >
           <List>
@@ -302,9 +333,10 @@ export function InitiativeTracker({ role }: { role: "PLAYER" | "GM" }) {
               <InitiativeListItem
                 key={item.id}
                 item={item}
-                onCountChange={(newCount) =>
-                  handleInitiativeCountChange(item.id, newCount)
-                }
+                darkMode={themeIsDark}
+                onCountChange={(newCount) => {
+                  handleInitiativeCountChange(item.id, newCount);
+                }}
                 showHidden={role === "GM"}
                 selected={selection.includes(item.id)}
               />
@@ -312,6 +344,54 @@ export function InitiativeTracker({ role }: { role: "PLAYER" | "GM" }) {
           </List>
         </HeightMonitor>
       </Box>
+
+      {advancedControls && (
+        <Box
+          sx={{
+            p: 1,
+            display: "flex",
+            justifyContent: "space-evenly",
+            gap: 1,
+          }}
+        >
+          <Box
+            sx={{
+              outline: 1,
+              outlineStyle: "solid",
+              outlineColor: themeIsDark
+                ? "rgba(255,255,255,0.1)"
+                : "rgba(0, 0, 0, 0.12)",
+              // background: "rgba(0,0,0,0.15)",
+              m: 0,
+              borderRadius: 9999,
+              display: "inline-flex",
+            }}
+          >
+            <IconButton
+              aria-label="previous"
+              onClick={() => handleDirectionClick(false)}
+              disabled={initiativeItems.length === 0}
+            >
+              <SkipPreviousRoundedIcon />
+            </IconButton>
+            {displayRound && (
+              <RoundControl
+                playerRole={role}
+                roundCount={roundCount}
+                setRoundCount={setRoundCount}
+                disableNotifications={disableNotifications}
+              />
+            )}
+            <IconButton
+              aria-label="next"
+              onClick={() => handleDirectionClick()}
+              disabled={initiativeItems.length === 0}
+            >
+              <SkipNextRounded />
+            </IconButton>
+          </Box>
+        </Box>
+      )}
     </Stack>
   );
 }
