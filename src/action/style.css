@@ -1,58 +1,77 @@
 .outline-image {
   -webkit-filter: drop-shadow(1px 1px 0 #9966ff) drop-shadow(-1px 1px 0 #9966ff)
     drop-shadow(1px -1px 0 #9966ff) drop-shadow(-1px -1px 0 #9966ff);
+
   filter: drop-shadow(1px 1px 0 #9966ff) drop-shadow(-1px 1px 0 #9966ff)
     drop-shadow(1px -1px 0 #9966ff) drop-shadow(-1px -1px 0 #9966ff);
 }
+
 .dark\:outline-image:is(.dark *) {
   -webkit-filter: drop-shadow(1px 1px 0 #bb99ff) drop-shadow(-1px 1px 0 #bb99ff)
     drop-shadow(1px -1px 0 #bb99ff) drop-shadow(-1px -1px 0 #bb99ff);
+
   filter: drop-shadow(1px 1px 0 #bb99ff) drop-shadow(-1px 1px 0 #bb99ff)
     drop-shadow(1px -1px 0 #bb99ff) drop-shadow(-1px -1px 0 #bb99ff);
 }
 
-/* Only the separate Owlbear help popover uses these styles. The tracker is
-   never resized or covered, and help text cannot inherit header nowrap. */
-.sr-help-document,
-.sr-help-document body,
-.sr-help-document #root {
-  height: 100%;
+/* SR rules are a separate slide-out surface within the dynamically enlarged
+   Owlbear action iframe, not an overlay covering the tracker. */
+.sr-rules-panel {
+  position: fixed;
+  z-index: 1200;
+  left: 250px;
+  top: 0;
+  box-sizing: border-box;
+  /* Match HELP_PANEL_WIDTH from actionDimensions.ts; shrink if the host caps
+     the popover width, instead of cropping long rules. */
+  width: min(520px, calc(100vw - 250px));
   min-width: 0;
-  margin: 0;
+  height: 100vh;
   overflow-x: hidden;
-}
-.sr-help-document * { box-sizing: border-box; }
-.sr-help-document body { overflow-y: auto; }
-.sr-help-sheet {
-  min-width: 0;
-  min-height: 100%;
-  padding: 16px 18px 20px;
-  white-space: normal !important;
-  overflow-wrap: break-word;
-  word-break: normal;
-  animation: sr-help-reveal 210ms ease-out both;
-}
-.sr-help-sheet * {
-  min-width: 0;
+  overflow-y: auto;
   white-space: normal;
   overflow-wrap: break-word;
+  border-left: 1px solid;
+  box-shadow: -8px 0 24px rgba(0, 0, 0, 0.12);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-15px);
+  pointer-events: none;
+  transition: opacity 240ms ease, transform 240ms cubic-bezier(.2,.8,.2,1), visibility 240ms;
 }
-.sr-help-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-  margin-bottom: 8px;
+
+.sr-rules-panel--open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+  pointer-events: auto;
 }
-.sr-help-tier { margin-top: 16px; }
-.sr-help-tier-title { margin-bottom: 6px !important; }
-.sr-help-list { margin: 0; padding-left: 19px; }
-.sr-help-list li { margin-bottom: 6px; }
-.sr-help-note { border-radius: 9px; padding: 12px 13px; margin-top: 17px; }
-@keyframes sr-help-reveal {
-  from { opacity: 0; transform: translateY(-8px); }
-  to { opacity: 1; transform: translateY(0); }
+
+/* CardHeader's title uses nowrap; the help panel must not inherit it. */
+.sr-rules-panel,
+.sr-rules-panel * {
+  white-space: normal !important;
+  overflow-wrap: break-word;
 }
+.sr-rules-panel__inner {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  padding: 18px 19px 24px;
+}
+.sr-rules-tier { margin-top: 17px; }
+.sr-rules-list { padding-left: 20px; margin: 0; }
+.sr-rules-list li { margin-bottom: 5px; }
+.sr-rules-note { padding: 12px; border-radius: 8px; margin-top: 17px; }
+
+@media (hover: none), (pointer: coarse) {
+  .sr-rules-panel {
+    left: 0;
+    width: min(350px, 100vw);
+    border-left: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .sr-help-sheet { animation: none; }
+  .sr-rules-panel { transition-duration: 0ms; }
 }
