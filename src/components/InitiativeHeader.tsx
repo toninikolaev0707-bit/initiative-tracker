@@ -56,12 +56,7 @@ export function InitiativeHeader({
   }
 
   return (
-    <Box
-      sx={{ width: "100%", flexShrink: 0 }}
-      onPointerLeave={(event) => {
-        if (event.pointerType !== "touch") updateRulesOpen(false);
-      }}
-    >
+    <Box sx={{ width: "100%", flexShrink: 0 }}>
       <CardHeader
         title="Счётчик СР"
         action={
@@ -72,9 +67,6 @@ export function InitiativeHeader({
                 aria-label="Показать правила СР"
                 aria-expanded={rulesOpen}
                 aria-controls="sr-rules-summary"
-                onPointerEnter={(event) => {
-                  if (event.pointerType !== "touch") updateRulesOpen(true);
-                }}
                 onClick={() => updateRulesOpen(!rulesOpen)}
                 sx={{ p: 0.5, mr: 0.25, flexShrink: 0 }}
               >
