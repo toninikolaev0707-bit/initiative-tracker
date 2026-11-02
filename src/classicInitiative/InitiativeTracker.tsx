@@ -14,7 +14,7 @@ import { InitiativeItem } from "../components/InitiativeItem";
 
 import { InitiativeListItem } from "./InitiativeListItem";
 import { getPluginId } from "../helpers/getPluginId";
-import { InitiativeHeader } from "../components/InitiativeHeader";
+import { InitiativeHeader, NORMAL_POPOVER_WIDTH, RULES_POPOVER_WIDTH, RULES_EXTRA_HEIGHT } from "../components/InitiativeHeader";
 import { isPlainObject } from "../helpers/isPlainObject";
 import { sortFromOrder, sortList, useOrder } from "./sceneOrder";
 import { Icon, useTheme } from "@mui/material";
@@ -35,7 +35,6 @@ import SettingsButton from "../settings/SettingsButton";
 import { labelItem, selectItem } from "../helpers/findItem";
 import useSelection from "../helpers/useSelection";
 import HeightMonitor from "../components/HeightMonitor";
-import { setTrackerHeight, TRACKER_WIDTH } from "../helpers/actionDimensions";
 import { RoundControl } from "../components/RoundControl";
 import { broadcastRoundChangeEventMessage } from "../helpers/broadcastRoundImplementation";
 
@@ -62,6 +61,8 @@ export function InitiativeTracker({ role }: { role: "PLAYER" | "GM" }) {
 
   // Initiative
   const [initiativeItems, setInitiativeItems] = useState<InitiativeItem[]>([]);
+  const [rulesOpen, setRulesOpen] = useState(false);
+  const [listHeight, setListHeight] = useState(0);
   const [roundCount, setRoundCount] = useState(1);
 
   const selection = useSelection();
@@ -284,11 +285,20 @@ export function InitiativeTracker({ role }: { role: "PLAYER" | "GM" }) {
   const order = useOrder();
   const sortedInitiativeItems = sortFromOrder(initiativeItems, order);
 
+  useEffect(() => {
+    void OBR.action.setWidth(rulesOpen ? RULES_POPOVER_WIDTH : NORMAL_POPOVER_WIDTH);
+    void OBR.action.setHeight(
+      66 + Math.max(64, listHeight) + (advancedControls ? 56 : 0) +
+      (rulesOpen ? RULES_EXTRA_HEIGHT : 0),
+    );
+  }, [rulesOpen, listHeight, advancedControls]);
+
   const themeIsDark = useTheme().palette.mode === "dark";
 
   return (
-    <Stack height="100vh" sx={{ width: TRACKER_WIDTH }}>
+    <Stack height="100vh">
       <InitiativeHeader
+        onRulesOpenChange={setRulesOpen}
         subtitle={
           initiativeItems.length === 0
             ? "Select a character to start initiative"
@@ -323,11 +333,7 @@ export function InitiativeTracker({ role }: { role: "PLAYER" | "GM" }) {
 
       <Box sx={{ overflowY: "auto" }}>
         <HeightMonitor
-          onChange={(height) =>
-            setTrackerHeight(
-              66 + Math.max(64, height) + (advancedControls ? 56 : 0),
-            )
-          }
+          onChange={setListHeight}
         >
           <List>
             {sortedInitiativeItems.map((item) => (

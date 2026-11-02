@@ -12,7 +12,7 @@ import OBR, { isImage, Item, Metadata } from "@owlbear-rodeo/sdk";
 import { InitiativeItem } from "../components/InitiativeItem";
 
 import { getPluginId } from "../helpers/getPluginId";
-import { InitiativeHeader } from "../components/InitiativeHeader";
+import { InitiativeHeader, NORMAL_POPOVER_WIDTH, RULES_POPOVER_WIDTH, RULES_EXTRA_HEIGHT } from "../components/InitiativeHeader";
 import { Divider, Typography } from "@mui/material";
 import {
   DISABLE_NOTIFICATION_METADATA_ID,
@@ -47,12 +47,13 @@ import isMetadata from "./isMetadata";
 import writeGroupDataToItems from "./writeGroupDataToItems";
 import useSelection from "../helpers/useSelection";
 import HeightMonitor from "../components/HeightMonitor";
-import { setTrackerHeight, TRACKER_WIDTH } from "../helpers/actionDimensions";
 import { RoundControl } from "../components/RoundControl";
 import { broadcastRoundChangeEventMessage } from "../helpers/broadcastRoundImplementation";
 
 export function ZipperInitiative({ role }: { role: "PLAYER" | "GM" }) {
   const [initiativeItems, setInitiativeItems] = useState<InitiativeItem[]>([]);
+  const [rulesOpen, setRulesOpen] = useState(false);
+  const [listHeight, setListHeight] = useState(0);
   const [previousStack, setPreviousStack] = useState<string[]>([]);
 
   const [roundCount, setRoundCount] = useState(1);
@@ -276,6 +277,14 @@ export function ZipperInitiative({ role }: { role: "PLAYER" | "GM" }) {
     if (selectActiveItem == 2) removeLabel();
   }
 
+  useEffect(() => {
+    void OBR.action.setWidth(rulesOpen ? RULES_POPOVER_WIDTH : NORMAL_POPOVER_WIDTH);
+    void OBR.action.setHeight(
+      Math.max(64, listHeight) + 64 + 2 + (displayRound ? 54 : 0) +
+      (rulesOpen ? RULES_EXTRA_HEIGHT : 0),
+    );
+  }, [rulesOpen, listHeight, displayRound]);
+
   const partyItems = initiativeItems.filter((item) => item.group === 0);
   const enemyItems = initiativeItems.filter((item) => item.group === 1);
   const adversariesDividerId = getGroupDividerId("Adversaries");
@@ -372,8 +381,9 @@ export function ZipperInitiative({ role }: { role: "PLAYER" | "GM" }) {
       }}
     >
       <SortableContext items={sortableItems}>
-        <Stack height="100vh" sx={{ width: TRACKER_WIDTH }}>
+        <Stack height="100vh">
           <InitiativeHeader
+            onRulesOpenChange={setRulesOpen}
             action={
               <>
                 {role === "GM" && <SettingsButton></SettingsButton>}
@@ -401,9 +411,7 @@ export function ZipperInitiative({ role }: { role: "PLAYER" | "GM" }) {
 
           <Box sx={{ overflowY: "auto", overflowX: "clip" }}>
             <HeightMonitor
-              onChange={(height) =>
-                setTrackerHeight(height + 64 + 2 + (displayRound ? 54 : 0))
-              }
+              onChange={setListHeight}
             >
               <GroupHeading groupName="Party" />
 
