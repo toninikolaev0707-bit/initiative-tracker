@@ -14,44 +14,57 @@
     drop-shadow(1px -1px 0 #bb99ff) drop-shadow(-1px -1px 0 #bb99ff);
 }
 
-/* SR rules are a separate slide-out surface within the dynamically enlarged
-   Owlbear action iframe, not an overlay covering the tracker. */
+/* Compact in-window popover for SR rules. It overlays the tracker instead of
+   expanding sideways, which fits Owlbear's narrow action panel better. */
 .sr-rules-panel {
   position: fixed;
-  z-index: 1200;
-  left: 250px;
-  top: 0;
+  z-index: 1300;
+  top: 52px;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
   box-sizing: border-box;
-  width: 360px;
-  height: 100vh;
   overflow-y: auto;
-  border-left: 1px solid;
-  box-shadow: -8px 0 24px rgba(0, 0, 0, 0.12);
+  border: 1px solid;
+  border-radius: 14px;
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.28);
   opacity: 0;
   visibility: hidden;
-  transform: translateX(-15px);
+  transform: translateY(-8px) scale(0.98);
+  transform-origin: top center;
   pointer-events: none;
-  transition: opacity 240ms ease, transform 240ms cubic-bezier(.2,.8,.2,1), visibility 240ms;
+  transition: opacity 220ms ease, transform 220ms cubic-bezier(.2,.8,.2,1), visibility 220ms;
 }
 
 .sr-rules-panel--open {
   opacity: 1;
   visibility: visible;
-  transform: translateX(0);
+  transform: translateY(0) scale(1);
   pointer-events: auto;
 }
 
-.sr-rules-panel__inner { padding: 18px 19px 24px; }
-.sr-rules-tier { margin-top: 17px; }
-.sr-rules-list { padding-left: 20px; margin: 0; }
-.sr-rules-list li { margin-bottom: 5px; }
-.sr-rules-note { padding: 12px; border-radius: 8px; margin-top: 17px; }
+.sr-rules-panel__inner { padding: 14px 14px 16px; }
+.sr-rules-tier { margin-top: 14px; }
+.sr-rules-list {
+  padding-left: 18px;
+  margin: 0;
+}
+.sr-rules-list li {
+  margin-bottom: 6px;
+  overflow-wrap: anywhere;
+}
+.sr-rules-note {
+  padding: 11px 12px;
+  border-radius: 10px;
+  margin-top: 14px;
+}
 
 @media (hover: none), (pointer: coarse) {
   .sr-rules-panel {
-    left: 0;
-    width: 350px;
-    border-left: none;
+    top: 46px;
+    left: 6px;
+    right: 6px;
+    bottom: 6px;
   }
 }
 

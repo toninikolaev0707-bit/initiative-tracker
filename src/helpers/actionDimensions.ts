@@ -1,9 +1,9 @@
 import OBR from "@owlbear-rodeo/sdk";
 
-// The main tracker stays 250px wide; its help panel is displayed alongside it.
+// The tracker is kept narrow. When the SR help is open we only increase height,
+// because a side-by-side layout is awkward inside Owlbear's small action frame.
 export const TRACKER_WIDTH = 250;
-export const HELP_PANEL_WIDTH = 360;
-export const HELP_PANEL_HEIGHT = 560;
+export const HELP_PANEL_HEIGHT = 520;
 
 let trackerHeight = 129;
 let helpVisible = false;
@@ -14,12 +14,10 @@ export function setTrackerHeight(height: number) {
   if (!helpVisible) void OBR.action.setHeight(height);
 }
 
-/** Resize the Owlbear action iframe so the help card is not clipped. */
-export function setHelpVisible(visible: boolean, compact: boolean) {
+/** Resize the Owlbear action iframe so the compact help card is not clipped. */
+export function setHelpVisible(visible: boolean, _compact: boolean) {
   helpVisible = visible;
-  void OBR.action.setWidth(
-    visible ? TRACKER_WIDTH + (compact ? 100 : HELP_PANEL_WIDTH) : TRACKER_WIDTH,
-  );
+  void OBR.action.setWidth(TRACKER_WIDTH);
   void OBR.action.setHeight(
     visible ? Math.max(trackerHeight, HELP_PANEL_HEIGHT) : trackerHeight,
   );

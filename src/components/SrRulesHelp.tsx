@@ -108,9 +108,9 @@ export function SrRulesHelp() {
               <CloseRoundedIcon fontSize="small" />
             </IconButton>
           </Box>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.7 }}>
-            Бонусы получает существо, чей СР выше СР конкретного противника
-            на указанное число или больше. Эффекты действуют только против него.
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.7, lineHeight: 1.4 }}>
+            Бонусы получает существо, чей СР выше СР противника на указанное
+            число или больше. Эффекты действуют только против этого противника.
           </Typography>
 
           <SrTier title="Разница 2 СР" items={[
@@ -132,12 +132,13 @@ export function SrRulesHelp() {
             <Typography variant="subtitle2" sx={{ fontWeight: 750, mb: 0.5 }}>
               Правила уклонения
             </Typography>
-            <Typography variant="body2">
-              Чтобы увернуться, соверши проверку Ловкости или основной характеристики
-              против СЛ атакующего.
+            <Typography variant="body2" sx={{ lineHeight: 1.4 }}>
+              Чтобы увернуться, соверши проверку Ловкости или основной
+              характеристики против СЛ атакующего.
             </Typography>
-            <Typography variant="body2" sx={{ mt: 0.6 }}>
-              При натуральной 20 на атаке проверка уклонения совершается с помехой.
+            <Typography variant="body2" sx={{ mt: 0.6, lineHeight: 1.4 }}>
+              При натуральной 20 на атаке проверка уклонения совершается
+              с помехой.
             </Typography>
           </Box>
         </Box>
