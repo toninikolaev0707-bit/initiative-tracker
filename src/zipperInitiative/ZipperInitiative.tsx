@@ -47,6 +47,7 @@ import isMetadata from "./isMetadata";
 import writeGroupDataToItems from "./writeGroupDataToItems";
 import useSelection from "../helpers/useSelection";
 import HeightMonitor from "../components/HeightMonitor";
+import { setTrackerHeight, TRACKER_WIDTH } from "../helpers/actionDimensions";
 import { RoundControl } from "../components/RoundControl";
 import { broadcastRoundChangeEventMessage } from "../helpers/broadcastRoundImplementation";
 
@@ -371,7 +372,7 @@ export function ZipperInitiative({ role }: { role: "PLAYER" | "GM" }) {
       }}
     >
       <SortableContext items={sortableItems}>
-        <Stack height="100vh">
+        <Stack height="100vh" sx={{ width: TRACKER_WIDTH }}>
           <InitiativeHeader
             action={
               <>
@@ -401,7 +402,7 @@ export function ZipperInitiative({ role }: { role: "PLAYER" | "GM" }) {
           <Box sx={{ overflowY: "auto", overflowX: "clip" }}>
             <HeightMonitor
               onChange={(height) =>
-                OBR.action.setHeight(height + 64 + 2 + (displayRound ? 54 : 0))
+                setTrackerHeight(height + 64 + 2 + (displayRound ? 54 : 0))
               }
             >
               <GroupHeading groupName="Party" />

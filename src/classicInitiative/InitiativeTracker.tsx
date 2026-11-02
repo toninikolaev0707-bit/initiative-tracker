@@ -35,6 +35,7 @@ import SettingsButton from "../settings/SettingsButton";
 import { labelItem, selectItem } from "../helpers/findItem";
 import useSelection from "../helpers/useSelection";
 import HeightMonitor from "../components/HeightMonitor";
+import { setTrackerHeight, TRACKER_WIDTH } from "../helpers/actionDimensions";
 import { RoundControl } from "../components/RoundControl";
 import { broadcastRoundChangeEventMessage } from "../helpers/broadcastRoundImplementation";
 
@@ -286,7 +287,7 @@ export function InitiativeTracker({ role }: { role: "PLAYER" | "GM" }) {
   const themeIsDark = useTheme().palette.mode === "dark";
 
   return (
-    <Stack height="100vh">
+    <Stack height="100vh" sx={{ width: TRACKER_WIDTH }}>
       <InitiativeHeader
         subtitle={
           initiativeItems.length === 0
@@ -323,7 +324,7 @@ export function InitiativeTracker({ role }: { role: "PLAYER" | "GM" }) {
       <Box sx={{ overflowY: "auto" }}>
         <HeightMonitor
           onChange={(height) =>
-            OBR.action.setHeight(
+            setTrackerHeight(
               66 + Math.max(64, height) + (advancedControls ? 56 : 0),
             )
           }
