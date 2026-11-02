@@ -9,107 +9,126 @@ import { getPluginId } from "../helpers/getPluginId";
 
 const POPOVER_ID = getPluginId("sr-rules-popover");
 const HOVER_CHANNEL = getPluginId("sr-rules-hover");
-const LEAVE_DELAY = 1050;
+const CLOSE_DELAY = 900;
 
-/** The small ? icon inside the tracker. The actual help lives in a SEPARATE
- *  native Owlbear popover, never in or over the 250px initiative tracker. */
+/**
+ * A second, native Owlbear popover is used for the reference sheet.
+ * The action popover can be limited to 250px, so placing the sheet inside it
+ * (or trying to resize the action to 770px) can make the sheet invisible.
+ */
 export function SrRulesHelp() {
   const [visible, setVisible] = useState(false);
-  const closeTimer = useRef<ReturnType<typeof setTimeout> | undefined>();
-  const opening = useRef(false);
-  const hasHover = () => window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+  const pinnedRef = useRef(false);
+  const isOpening = useRef(false);
+  const closeTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const canHover = () =>
+    window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 
   function cancelClose() {
-    if (closeTimer.current !== undefined) clearTimeout(closeTimer.current);
-    closeTimer.current = undefined;
+    if (closeTimeout.current !== null) {
+      clearTimeout(closeTimeout.current);
+      closeTimeout.current = null;
+    }
   }
 
-  async function openHelp() {
+  function markShown(value: boolean) {
+    setVisible(value);
+  }
+
+  async function showHelp() {
     cancelClose();
-    if (opening.current) return;
-    opening.current = true;
+    if (isOpening.current) return;
+    isOpening.current = true;
     try {
-      const alreadyOpen = await OBR.popover.getWidth(POPOVER_ID);
-      if (!alreadyOpen) {
+      const width = await OBR.popover.getWidth(POPOVER_ID);
+      if (width === undefined) {
+        // Using the same HTML entry avoids creating a separate build route.
+        // The query parameter renders only the help sheet in that iframe.
         const url = new URL(window.location.href);
         url.searchParams.set("srHelp", "1");
         await OBR.popover.open({
           id: POPOVER_ID,
           url: url.href,
-          width: 376,
-          height: 522,
-          // Action popovers live at the top-left of Owlbear. Anchor the help
-          // beside the tracker rather than stretching the tracker itself.
+          width: 470,
+          height: 655,
           anchorReference: "POSITION",
-          anchorPosition: { left: 264, top: 60 },
+          anchorPosition: { left: 260, top: 55 },
           anchorOrigin: { horizontal: "LEFT", vertical: "TOP" },
           transformOrigin: { horizontal: "LEFT", vertical: "TOP" },
           hidePaper: true,
         });
       }
-      setVisible(true);
+      markShown(true);
     } catch (error) {
-      console.error("Cannot open SR rules popover", error);
+      console.error("Failed to open the SR reference sheet:", error);
+      markShown(false);
     } finally {
-      opening.current = false;
+      isOpening.current = false;
+    }
+  }
+
+  async function hideHelp() {
+    cancelClose();
+    pinnedRef.current = false;
+    markShown(false);
+    try {
+      await OBR.popover.close(POPOVER_ID);
+    } catch (error) {
+      console.error("Failed to close the SR reference sheet:", error);
     }
   }
 
   function scheduleClose() {
     cancelClose();
-    closeTimer.current = setTimeout(() => {
-      void OBR.popover.close(POPOVER_ID).catch(console.error);
-      setVisible(false);
-    }, LEAVE_DELAY);
+    if (pinnedRef.current) return;
+    closeTimeout.current = setTimeout(() => {
+      if (!pinnedRef.current) void hideHelp();
+    }, CLOSE_DELAY);
   }
 
   useEffect(() => {
-    // v1.6.2/1.6.3 expanded the main action popover. Reset that old size.
-    void OBR.action.setWidth(250);
-    const offHover = OBR.broadcast.onMessage(HOVER_CHANNEL, (event) => {
+    // Restore action width left behind by v1.6.2/v1.6.3.
+    void OBR.action.setWidth(250).catch(console.error);
+    const unsubscribeHover = OBR.broadcast.onMessage(HOVER_CHANNEL, (event) => {
       if (event.data === "enter") cancelClose();
       if (event.data === "leave") scheduleClose();
       if (event.data === "close") {
         cancelClose();
-        setVisible(false);
+        pinnedRef.current = false;
+        markShown(false);
       }
     });
-    const offAction = OBR.action.onOpenChange((isOpen) => {
-      if (!isOpen) {
-        cancelClose();
-        setVisible(false);
-        void OBR.popover.close(POPOVER_ID).catch(console.error);
-      }
-    });
+    // Do not close the new popover on action.onOpenChange(false): Owlbear
+    // may report the action as closed while bringing another popover forward.
+    // The sheet has its own close button and native click-away dismissal.
     return () => {
       cancelClose();
-      offHover();
-      offAction();
-      void OBR.popover.close(POPOVER_ID).catch(console.error);
+      unsubscribeHover();
     };
   }, []);
 
   return (
     <IconButton
       size="small"
-      aria-label="Памятка по разнице СР"
-      title="Правила разницы СР"
+      aria-label="Памятка о преимуществах СР"
+      title="Памятка о преимуществах СР"
       aria-expanded={visible}
-      onMouseEnter={() => { if (hasHover()) void openHelp(); }}
-      onMouseLeave={() => { if (hasHover()) scheduleClose(); }}
-      onFocus={() => { if (hasHover()) void openHelp(); }}
-      onBlur={() => { if (hasHover()) scheduleClose(); }}
+      onMouseEnter={() => { if (canHover()) void showHelp(); }}
+      onMouseLeave={() => { if (canHover()) scheduleClose(); }}
+      onFocus={() => { if (canHover()) void showHelp(); }}
+      onBlur={() => { if (canHover()) scheduleClose(); }}
       onClick={() => {
         cancelClose();
-        // Click opens the help on touch screens, and toggles it on desktop.
+        // Check the actual Owlbear popover so a click can reopen it even if
+        // it was dismissed externally while the trigger still looked active.
         void (async () => {
-          const existing = await OBR.popover.getWidth(POPOVER_ID);
-          if (existing && !hasHover()) {
-            // Touch devices have no hover: tap again to close.
-            await OBR.popover.close(POPOVER_ID);
-            setVisible(false);
-          } else if (!existing) {
-            await openHelp();
+          const existingWidth = await OBR.popover.getWidth(POPOVER_ID);
+          if (pinnedRef.current && existingWidth !== undefined) {
+            await hideHelp();
+          } else {
+            pinnedRef.current = true;
+            await showHelp();
           }
         })().catch(console.error);
       }}
@@ -128,7 +147,7 @@ function Tier({ title, items }: { title: string; items: string[] }) {
       </Typography>
       <Box component="ul" className="sr-help-list">
         {items.map((item) => (
-          <Typography component="li" variant="body2" key={item} sx={{ lineHeight: 1.46 }}>
+          <Typography component="li" variant="body2" key={item} sx={{ lineHeight: 1.45 }}>
             {item}
           </Typography>
         ))}
@@ -137,7 +156,7 @@ function Tier({ title, items }: { title: string; items: string[] }) {
   );
 }
 
-/** This component is rendered in a dedicated iframe (?srHelp=1). */
+/** Rendered by the same action HTML, but in the separate ?srHelp=1 iframe. */
 export function SrRulesHelpContent() {
   const notifyHover = (status: "enter" | "leave" | "close") => {
     void OBR.broadcast.sendMessage(HOVER_CHANNEL, status, { destination: "LOCAL" })
@@ -152,7 +171,7 @@ export function SrRulesHelpContent() {
       onMouseLeave={() => notifyHover("leave")}
     >
       <Box className="sr-help-header">
-        <Typography variant="h6" sx={{ fontSize: 17, fontWeight: 750 }}>
+        <Typography variant="h6" sx={{ fontSize: 18, fontWeight: 750 }}>
           Преимущества СР
         </Typography>
         <IconButton
@@ -169,8 +188,8 @@ export function SrRulesHelpContent() {
       </Box>
 
       <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.5 }}>
-        Преимущества получает существо, чей СР выше СР противника на указанное
-        число или больше. Они действуют только против него.
+        Преимущества получает существо, чей СР выше СР конкретного противника
+        на указанное число или больше. Эффекты действуют только против него.
       </Typography>
 
       <Tier title="Разница 2 СР" items={[
@@ -189,14 +208,14 @@ export function SrRulesHelpContent() {
       ]} />
 
       <Box className="sr-help-note" sx={{ bgcolor: "action.hover" }}>
-        <Typography variant="subtitle2" sx={{ fontWeight: 750, mb: 0.6 }}>
+        <Typography variant="subtitle2" sx={{ fontWeight: 750, mb: 0.5 }}>
           Правила уклонения
         </Typography>
-        <Typography variant="body2" sx={{ lineHeight: 1.5 }}>
-          Чтобы увернуться, соверши проверку Ловкости или основной
-          характеристики против СЛ атакующего.
+        <Typography variant="body2" sx={{ lineHeight: 1.45 }}>
+          Чтобы увернуться, соверши проверку Ловкости или основной характеристики
+          против СЛ атакующего.
         </Typography>
-        <Typography variant="body2" sx={{ mt: 0.7, lineHeight: 1.5 }}>
+        <Typography variant="body2" sx={{ mt: 0.6, lineHeight: 1.45 }}>
           При натуральной 20 на атаке проверка уклонения совершается с помехой.
         </Typography>
       </Box>
